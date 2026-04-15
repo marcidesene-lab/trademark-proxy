@@ -41,7 +41,7 @@ const clientSecret = 'c530dff7426b17cd4668d753af440aa5';
         client_secret: clientSecret,
         scope: 'tmdsview:search',
       }),
-      signal: AbortSignal.timeout(10000),
+      signal: AbortSignal.timeout(25000),
     });
 
     if (!tokenRes.ok) {
