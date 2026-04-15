@@ -1,0 +1,6 @@
+{
+  "name": "trademark-proxy",
+  "version": "1.0.0",
+  "description": "Proxy server pentru OSIM si EUIPO Trademark API",
+  "private": true
+}
