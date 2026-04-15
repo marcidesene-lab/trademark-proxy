@@ -42,7 +42,7 @@ async function searchOSIM(searchType, searchValue, niceClass, res) {
     if (niceClass) params.append('niceClass', niceClass);
 
     const response = await fetch(
-      `https://api.osim.ro:8443/tm-registry/api/v1/trademarks?${params}`,
+      `http://api.osim.ro:8083/TMreg/api/v1/trademarks?${params}`,
       {
         headers: { 'Accept': 'application/json' },
         signal: AbortSignal.timeout(10000),
