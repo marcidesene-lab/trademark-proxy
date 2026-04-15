@@ -13,74 +13,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Parametrul searchValue lipseste' });
   }
 
-  if (!searchType || !['name', 'applicationNumber', 'registrationNumber'].includes(searchType)) {
-    return res.status(400).json({ error: 'searchType trebuie sa fie: name, applicationNumber sau registrationNumber' });
-  }
-
-  if (source === 'osim') {
-    return await searchOSIM(searchType, searchValue, niceClass, res);
-  } else if (source === 'euipo') {
-    return await searchEUIPO(searchType, searchValue, niceClass, res);
+  if (source === 'euipo') {
+    return await searchEUIPO(searchType || 'name', searchValue, niceClass, res);
   } else {
-    return res.status(400).json({ error: 'Source trebuie sa fie osim sau euipo' });
-  }
-}
-
-async function searchOSIM(searchType, searchValue, niceClass, res) {
-  try {
-    const cleanValue = searchValue.replace(/\s+/g, '').replace(/[^\w\d]/g, '');
-    const params = new URLSearchParams({ page: 0, size: 10 });
-
-    if (searchType === 'name') {
-      params.append('name', searchValue);
-    } else if (searchType === 'applicationNumber') {
-      params.append('applicationNumber', cleanValue);
-    } else if (searchType === 'registrationNumber') {
-      params.append('registrationNumber', cleanValue);
-    }
-
-    if (niceClass) params.append('niceClass', niceClass);
-
-    const response = await fetch(
-      `http://api.osim.ro:8083/TMreg/api/v1/trademarks?${params}`,
-      {
-        headers: { 'Accept': 'application/json' },
-        signal: AbortSignal.timeout(10000),
-      }
-    );
-
-    if (!response.ok) {
-      return res.status(200).json({
-        source: 'osim', success: false,
-        error: `OSIM API status ${response.status}`, results: []
-      });
-    }
-
-    const data = await response.json();
-    const list = data.content || data.trademarks || data || [];
-    const results = list.map(tm => ({
-      name: tm.name || tm.trademarkName || tm.wordMark || '',
-      owner: tm.applicantName || tm.ownerName || tm.holder || '',
-      status: mapStatus(tm.status || tm.trademarkStatus || ''),
-      niceClass: tm.niceClass || tm.goodsAndServices || '',
-      applicationNumber: tm.applicationNumber || tm.id || '',
-      registrationNumber: tm.registrationNumber || '',
-      applicationDate: tm.applicationDate || tm.filingDate || '',
-      registrationDate: tm.registrationDate || '',
-      expiryDate: tm.expiryDate || tm.validUntil || '',
-    }));
-
-    return res.status(200).json({
-      source: 'osim', success: true,
-      total: data.totalElements || results.length,
-      results
-    });
-
-  } catch (err) {
-    return res.status(200).json({
-      source: 'osim', success: false,
-      error: 'Eroare conectare OSIM: ' + err.message, results: []
-    });
+    return res.status(400).json({ error: 'Source invalid. Folositi: euipo' });
   }
 }
 
@@ -132,7 +68,10 @@ async function searchEUIPO(searchType, searchValue, niceClass, res) {
     const searchRes = await fetch(
       `https://api.euipo.europa.eu/trademark-search/v1/trademarks?${params}`,
       {
-        headers: { 'Authorization': `Bearer ${access_token}`, 'Accept': 'application/json' },
+        headers: {
+          'Authorization': `Bearer ${access_token}`,
+          'Accept': 'application/json'
+        },
         signal: AbortSignal.timeout(10000),
       }
     );
