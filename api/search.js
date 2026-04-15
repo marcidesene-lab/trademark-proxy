@@ -21,8 +21,8 @@ export default async function handler(req, res) {
 }
 
 async function searchEUIPO(searchType, searchValue, niceClass, res) {
-  const clientId = process.env.EUIPO_CLIENT_ID;
-  const clientSecret = process.env.EUIPO_CLIENT_SECRET;
+ const clientId = bee06de986c60d64e7567a2000fcec0e;
+const clientSecret = 1d87c9597c1ad5e2817fdc628f698498;
 
   if (!clientId || !clientSecret) {
     return res.status(200).json({
